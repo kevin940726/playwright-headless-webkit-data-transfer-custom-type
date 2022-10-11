@@ -1,0 +1,48 @@
+name: End-to-End Tests Playwright
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  tests:
+    name: E2E Tests (headless) - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          [
+            'ubuntu-20.04',
+            'ubuntu-22.04',
+            'macos-11',
+            'macos-12',
+            'windows-2019',
+            'windows-2022',
+          ]
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - run: npm ci
+      - run: npx playwright install webkit --with-deps
+      - run: npm test
+
+  tests-linux-headed:
+    name: E2E Tests (headed) - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-20.04', 'ubuntu-22.04']
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - run: npm ci
+      - run: npx playwright install webkit --with-deps
+      - run: xvfb-run -- npm test -- --headed
